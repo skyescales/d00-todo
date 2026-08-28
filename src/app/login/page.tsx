@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 function LoginForm() {
   const router = useRouter();
@@ -36,31 +37,34 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-page px-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-brand-600 flex items-center justify-center text-white text-xl font-bold">
             G
           </div>
-          <h1 className="text-xl font-semibold text-slate-900">Gym Lead Tracker</h1>
-          <p className="text-sm text-slate-500 mt-1">Florida gym & studio outreach CRM</p>
+          <h1 className="text-xl font-semibold text-fg">Gym Lead Tracker</h1>
+          <p className="text-sm text-fg-muted mt-1">Florida gym & studio outreach CRM</p>
         </div>
         <form
           onSubmit={onSubmit}
-          className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4"
+          className="bg-surface border border-line rounded-xl shadow-sm p-6 space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-fg-muted mb-1">Password</label>
             <input
               type="password"
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              className="w-full rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               placeholder="••••••••"
             />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
           <button
             type="submit"
             disabled={loading}

@@ -71,10 +71,10 @@ export default function BulkImportModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Bulk Import Leads</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+      <div className="bg-surface rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-5 border-b border-line flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-fg">Bulk Import Leads</h2>
+          <button onClick={onClose} className="text-fg-subtle hover:text-fg-muted">
             ✕
           </button>
         </div>
@@ -82,10 +82,10 @@ export default function BulkImportModal({
         <div className="p-5 space-y-4">
           {!result ? (
             <>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-fg-muted">
                 Paste CSV text below, or upload a file. Expected columns (order flexible, case-insensitive):
               </p>
-              <p className="text-xs text-slate-400 bg-slate-50 rounded-lg p-2 font-mono">
+              <p className="text-xs text-fg-subtle bg-surface-muted rounded-lg p-2 font-mono">
                 {IMPORT_TEMPLATE_HEADERS.join(", ")}
               </p>
 
@@ -104,7 +104,7 @@ export default function BulkImportModal({
                 onChange={(e) => parse(e.target.value)}
                 rows={8}
                 placeholder="Business Name,City,Website URL,Instagram,Phone,..."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full rounded-lg border border-line bg-page text-fg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
 
               {parseErrors.length > 0 && (
@@ -115,7 +115,7 @@ export default function BulkImportModal({
                 </div>
               )}
 
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-fg-muted">
                 {parsedRows.length} row{parsedRows.length === 1 ? "" : "s"} ready to import.
               </p>
 
@@ -127,18 +127,18 @@ export default function BulkImportModal({
                 >
                   {importing ? "Importing…" : `Import ${parsedRows.length} leads`}
                 </button>
-                <button onClick={onClose} className="text-sm text-slate-500 hover:text-slate-700">
+                <button onClick={onClose} className="text-sm text-fg-muted hover:text-fg">
                   Cancel
                 </button>
               </div>
             </>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-fg">
                 Imported <strong>{result.inserted}</strong> of {result.total} rows.
               </p>
               {result.skippedDuplicates.length > 0 && (
-                <div className="text-xs text-slate-500 bg-slate-50 rounded-lg p-2">
+                <div className="text-xs text-fg-muted bg-surface-muted rounded-lg p-2">
                   <p className="font-medium mb-1">Skipped {result.skippedDuplicates.length} duplicate(s):</p>
                   {result.skippedDuplicates.map((d, i) => (
                     <div key={i}>

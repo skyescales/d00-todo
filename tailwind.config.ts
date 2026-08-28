@@ -5,6 +5,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        page: "rgb(var(--color-page) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        "surface-muted": "rgb(var(--color-surface-muted) / <alpha-value>)",
+        line: "rgb(var(--color-line) / <alpha-value>)",
+        fg: "rgb(var(--color-fg) / <alpha-value>)",
+        "fg-muted": "rgb(var(--color-fg-muted) / <alpha-value>)",
+        "fg-subtle": "rgb(var(--color-fg-subtle) / <alpha-value>)",
         brand: {
           50: "#eef7ff",
           100: "#d9edff",

@@ -25,14 +25,14 @@ export default function NotesLog({ leadId, initialNotes }: { leadId: string; ini
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4">
-      <h2 className="text-sm font-semibold text-slate-700 mb-3">Follow-Up Notes / Activity Log</h2>
+    <div className="bg-surface border border-line rounded-xl p-4">
+      <h2 className="text-sm font-semibold text-fg mb-3">Follow-Up Notes / Activity Log</h2>
       <form onSubmit={addNote} className="flex gap-2 mb-4">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a timestamped note…"
-          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="flex-1 rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
         <button
           disabled={saving || !text.trim()}
@@ -42,13 +42,13 @@ export default function NotesLog({ leadId, initialNotes }: { leadId: string; ini
         </button>
       </form>
       {notes.length === 0 ? (
-        <p className="text-sm text-slate-400">No activity yet.</p>
+        <p className="text-sm text-fg-subtle">No activity yet.</p>
       ) : (
         <ul className="space-y-3">
           {notes.map((note) => (
-            <li key={note.id} className="border-l-2 border-slate-200 pl-3">
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{note.body}</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+            <li key={note.id} className="border-l-2 border-line pl-3">
+              <p className="text-sm text-fg whitespace-pre-wrap">{note.body}</p>
+              <p className="text-xs text-fg-subtle mt-0.5">
                 {new Date(note.createdAt).toLocaleString()}
               </p>
             </li>

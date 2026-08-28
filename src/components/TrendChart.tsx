@@ -34,7 +34,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+      <div className="flex justify-between text-[11px] text-fg-subtle mt-1">
         <span>{formatDate(data[0]?.date)}</span>
         <span>{formatDate(data[data.length - 1]?.date)}</span>
       </div>

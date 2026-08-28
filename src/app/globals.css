@@ -3,11 +3,48 @@
 @tailwind utilities;
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
+}
+
+/* Theme palettes - RGB triplets so Tailwind's <alpha-value> opacity modifiers
+   work (e.g. bg-surface/50). Default (no data-theme set yet) is navy, so
+   there's no flash of unstyled color before the boot script in layout.tsx
+   applies the user's saved choice. */
+:root,
+[data-theme="navy"] {
+  --color-page: 12 18 34;
+  --color-surface: 22 31 53;
+  --color-surface-muted: 33 44 71;
+  --color-line: 45 58 87;
+  --color-fg: 236 240 247;
+  --color-fg-muted: 148 163 184;
+  --color-fg-subtle: 100 116 139;
+}
+
+[data-theme="charcoal"] {
+  --color-page: 24 24 27;
+  --color-surface: 39 39 42;
+  --color-surface-muted: 55 55 60;
+  --color-line: 68 68 74;
+  --color-fg: 244 244 245;
+  --color-fg-muted: 161 161 170;
+  --color-fg-subtle: 113 113 122;
+}
+
+[data-theme="black"] {
+  /* Soft near-black, deliberately not #000 */
+  --color-page: 18 18 20;
+  --color-surface: 30 30 33;
+  --color-surface-muted: 44 44 48;
+  --color-line: 56 56 61;
+  --color-fg: 237 237 240;
+  --color-fg-muted: 161 161 168;
+  --color-fg-subtle: 113 113 122;
 }
 
 body {
-  background-color: #f8fafc;
+  background-color: rgb(var(--color-page));
+  color: rgb(var(--color-fg));
 }
 
 ::-webkit-scrollbar {
@@ -15,7 +52,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(var(--color-line));
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-track {

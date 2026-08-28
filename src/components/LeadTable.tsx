@@ -26,7 +26,7 @@ export default function LeadTable({
     return (
       <button
         onClick={() => onSort(field)}
-        className="flex items-center gap-1 text-xs font-semibold text-slate-500 uppercase tracking-wide hover:text-slate-700"
+        className="flex items-center gap-1 text-xs font-semibold text-fg-muted uppercase tracking-wide hover:text-fg"
       >
         {label}
         {active && <span>{dir === "asc" ? "↑" : "↓"}</span>}
@@ -36,24 +36,24 @@ export default function LeadTable({
 
   if (leads.length === 0) {
     return (
-      <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-sm">
+      <div className="bg-surface border border-line rounded-xl p-12 text-center text-fg-subtle text-sm">
         No leads match your filters yet.
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto">
+    <div className="bg-surface border border-line rounded-xl overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 text-left">
+          <tr className="border-b border-line text-left">
             <th className="px-4 py-3">
               <SortHeader field="businessName" label="Business" />
             </th>
             <th className="px-4 py-3">
               <SortHeader field="city" label="City" />
             </th>
-            <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Quick actions</th>
+            <th className="px-4 py-3 text-xs font-semibold text-fg-muted uppercase tracking-wide">Quick actions</th>
             <th className="px-4 py-3">
               <SortHeader field="status" label="Status" />
             </th>
@@ -67,23 +67,23 @@ export default function LeadTable({
         </thead>
         <tbody>
           {leads.map((lead) => (
-            <tr key={lead.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+            <tr key={lead.id} className="border-b border-line last:border-0 hover:bg-surface-muted">
               <td className="px-4 py-3">
-                <Link href={`/leads/${lead.id}`} className="font-medium text-slate-900 hover:text-brand-700">
+                <Link href={`/leads/${lead.id}`} className="font-medium text-fg hover:text-brand-700">
                   {lead.businessName}
                 </Link>
                 {lead.weaknessNotes && (
-                  <p className="text-xs text-slate-400 max-w-xs truncate">{lead.weaknessNotes}</p>
+                  <p className="text-xs text-fg-subtle max-w-xs truncate">{lead.weaknessNotes}</p>
                 )}
               </td>
-              <td className="px-4 py-3 text-slate-600">{lead.city}</td>
+              <td className="px-4 py-3 text-fg-muted">{lead.city}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   {lead.phone && (
                     <a
                       href={`tel:${lead.phone}`}
                       title={`Call ${lead.phone}`}
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-brand-100 text-slate-600 hover:text-brand-700"
+                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-brand-100 text-fg-muted hover:text-brand-700"
                     >
                       📞
                     </a>
@@ -94,7 +94,7 @@ export default function LeadTable({
                       target="_blank"
                       rel="noreferrer"
                       title="Open Instagram"
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-pink-100 text-slate-600 hover:text-pink-600"
+                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-pink-100 text-fg-muted hover:text-pink-600"
                     >
                       📷
                     </a>
@@ -107,7 +107,7 @@ export default function LeadTable({
                       target="_blank"
                       rel="noreferrer"
                       title="Visit website"
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600"
+                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-line text-fg-muted"
                     >
                       🌐
                     </a>
@@ -117,10 +117,10 @@ export default function LeadTable({
               <td className="px-4 py-3">
                 <StatusSelect leadId={lead.id} status={lead.status} />
               </td>
-              <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+              <td className="px-4 py-3 text-fg-muted whitespace-nowrap">
                 {new Date(lead.dateAdded).toLocaleDateString()}
               </td>
-              <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+              <td className="px-4 py-3 text-fg-muted whitespace-nowrap">
                 {lead.lastContactDate ? new Date(lead.lastContactDate).toLocaleDateString() : "—"}
               </td>
             </tr>

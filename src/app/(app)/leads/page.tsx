@@ -61,11 +61,11 @@ function LeadsPageInner() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Leads</h1>
+        <h1 className="text-xl font-semibold text-fg">Leads</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowImport(true)}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-300 text-slate-700 hover:bg-slate-50"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium border border-line text-fg hover:bg-surface-muted"
           >
             Bulk Import
           </button>
@@ -78,17 +78,17 @@ function LeadsPageInner() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 bg-white border border-slate-200 rounded-xl p-3">
+      <div className="flex flex-wrap gap-3 bg-surface border border-line rounded-xl p-3">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search business name…"
-          className="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="flex-1 min-w-[200px] rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm"
         >
           <option value="">All statuses</option>
           {STATUS_ORDER.map((s) => (
@@ -100,7 +100,7 @@ function LeadsPageInner() {
         <select
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm"
         >
           <option value="">All cities</option>
           {cities.map((c) => (
@@ -116,7 +116,7 @@ function LeadsPageInner() {
               setStatus("");
               setCity("");
             }}
-            className="text-sm text-slate-500 hover:text-slate-700"
+            className="text-sm text-fg-muted hover:text-fg"
           >
             Clear
           </button>
@@ -124,7 +124,7 @@ function LeadsPageInner() {
       </div>
 
       {loading ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-sm">
+        <div className="bg-surface border border-line rounded-xl p-12 text-center text-fg-subtle text-sm">
           Loading…
         </div>
       ) : (

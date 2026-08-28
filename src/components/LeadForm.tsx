@@ -103,8 +103,8 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>
       )}
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-700">Basics</h2>
+      <section className="bg-surface border border-line rounded-xl p-4 space-y-4">
+        <h2 className="text-sm font-semibold text-fg">Basics</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Business Name *">
             <input
@@ -132,15 +132,15 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
         </div>
       </section>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-700">Web presence</h2>
+      <section className="bg-surface border border-line rounded-xl p-4 space-y-4">
+        <h2 className="text-sm font-semibold text-fg">Web presence</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Website URL">
             <input
               value={form.websiteUrl}
               disabled={form.socialOnly}
               onChange={(e) => set("websiteUrl", e.target.value)}
-              className="input disabled:bg-slate-50 disabled:text-slate-400"
+              className="input disabled:bg-surface-muted disabled:text-fg-subtle"
               placeholder="https://…"
             />
           </Field>
@@ -158,19 +158,19 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
             </div>
           </Field>
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-600">
+        <label className="flex items-center gap-2 text-sm text-fg-muted">
           <input
             type="checkbox"
             checked={form.socialOnly}
             onChange={(e) => set("socialOnly", e.target.checked)}
-            className="rounded border-slate-300"
+            className="rounded border-line"
           />
           No website — social only
         </label>
       </section>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-700">Qualification</h2>
+      <section className="bg-surface border border-line rounded-xl p-4 space-y-4">
+        <h2 className="text-sm font-semibold text-fg">Qualification</h2>
         <Field label="Marketing Weakness Notes">
           <textarea
             value={form.weaknessNotes}
@@ -229,8 +229,8 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
       </section>
 
       {isEdit && (
-        <section className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
-          <h2 className="text-sm font-semibold text-slate-700">Status</h2>
+        <section className="bg-surface border border-line rounded-xl p-4 space-y-4">
+          <h2 className="text-sm font-semibold text-fg">Status</h2>
           <Field label="Pipeline Status">
             <select value={form.status} onChange={(e) => set("status", e.target.value as LeadStatus)} className="input">
               {STATUS_ORDER.map((s) => (
@@ -254,7 +254,7 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
+          className="px-4 py-2 rounded-lg text-sm font-medium text-fg-muted hover:bg-surface-muted"
         >
           Cancel
         </button>
@@ -264,7 +264,9 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
         .input {
           width: 100%;
           border-radius: 0.5rem;
-          border: 1px solid rgb(203 213 225);
+          border: 1px solid rgb(var(--color-line));
+          background: rgb(var(--color-page));
+          color: rgb(var(--color-fg));
           padding: 0.5rem 0.75rem;
           font-size: 0.875rem;
         }
@@ -281,7 +283,7 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-slate-500 mb-1">{label}</span>
+      <span className="block text-xs font-medium text-fg-muted mb-1">{label}</span>
       {children}
     </label>
   );

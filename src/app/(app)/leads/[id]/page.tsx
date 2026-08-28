@@ -36,17 +36,17 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-slate-900">{lead.businessName}</h1>
+            <h1 className="text-xl font-semibold text-fg">{lead.businessName}</h1>
             <StatusBadge status={lead.status} />
           </div>
-          <p className="text-sm text-slate-500 mt-1">{lead.city}, FL</p>
+          <p className="text-sm text-fg-muted mt-1">{lead.city}, FL</p>
           {!lead.instagram && lead.instagramConfidence === "NOT_FOUND" && (
             <p className="text-xs text-amber-600 mt-1">Auto-research looked for an Instagram and couldn&apos;t confirm one.</p>
           )}
         </div>
         <div className="flex items-center gap-3">
           {lead.phone && (
-            <a href={`tel:${lead.phone}`} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 hover:bg-slate-200">
+            <a href={`tel:${lead.phone}`} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-line">
               📞 Call
             </a>
           )}
@@ -55,7 +55,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               href={igUrl(lead.instagram)}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 hover:bg-pink-100"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-pink-100"
             >
               📷 DM
             </a>
@@ -67,7 +67,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               href={lead.websiteUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 hover:bg-slate-200"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-line"
             >
               🌐 Site
             </a>

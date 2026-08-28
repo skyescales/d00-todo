@@ -43,7 +43,7 @@ export default function KanbanBoard() {
 
   if (loading) {
     return (
-      <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 text-sm">
+      <div className="bg-surface border border-line rounded-xl p-12 text-center text-fg-subtle text-sm">
         Loading board…
       </div>
     );
@@ -63,13 +63,13 @@ export default function KanbanBoard() {
             onDragLeave={() => setDragOverStatus((s) => (s === status ? null : s))}
             onDrop={(e) => onDrop(e, status)}
             className={`w-72 shrink-0 rounded-xl border transition-colors ${
-              dragOverStatus === status ? "border-brand-400 bg-brand-50/40" : "border-slate-200 bg-slate-50"
+              dragOverStatus === status ? "border-brand-400 bg-brand-50/40" : "border-line bg-surface-muted"
             }`}
           >
             <div className={`sticky top-0 px-3 py-2 rounded-t-xl border-b ${STATUS_STYLES[status]} border-transparent`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">{STATUS_LABELS[status]}</h3>
-                <span className="text-xs font-medium bg-white/70 rounded-full px-1.5">{columnLeads.length}</span>
+                <span className="text-xs font-medium bg-surface/70 rounded-full px-1.5">{columnLeads.length}</span>
               </div>
             </div>
             <div className="p-2 space-y-2 min-h-[120px]">
@@ -77,7 +77,7 @@ export default function KanbanBoard() {
                 <KanbanCard key={lead.id} lead={lead} onDragStart={onDragStart} />
               ))}
               {columnLeads.length === 0 && (
-                <p className="text-xs text-slate-400 text-center py-4">Drop leads here</p>
+                <p className="text-xs text-fg-subtle text-center py-4">Drop leads here</p>
               )}
             </div>
           </div>

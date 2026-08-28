@@ -24,8 +24,8 @@ export default function InstagramSearchButton({
       title="Search Google for this business's Instagram"
       className={
         compact
-          ? `h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 hover:bg-pink-100 text-xs ${className}`
-          : `inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-pink-100 hover:text-pink-700 ${className}`
+          ? `h-6 w-6 flex items-center justify-center rounded-full bg-surface-muted hover:bg-pink-100 text-xs ${className}`
+          : `inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-surface-muted text-fg-muted hover:bg-pink-100 hover:text-pink-700 ${className}`
       }
     >
       🔍{!compact && " Search Instagram"}

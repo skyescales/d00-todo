@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-fg">Dashboard</h1>
         <Link
           href="/leads/new"
           className="sm:hidden inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-600 text-white"
@@ -67,26 +67,26 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-4">
-          <h2 className="text-sm font-medium text-slate-700 mb-2">Leads added — last 30 days</h2>
+        <div className="lg:col-span-2 bg-surface border border-line rounded-xl p-4">
+          <h2 className="text-sm font-medium text-fg mb-2">Leads added — last 30 days</h2>
           <TrendChart data={trend} />
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-surface border border-line rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-slate-700">Latest auto-sourcing runs</h2>
-            <span className="text-xs text-slate-400" title="Estimated Claude API spend, last 30 days">
+            <h2 className="text-sm font-medium text-fg">Latest auto-sourcing runs</h2>
+            <span className="text-xs text-fg-subtle" title="Estimated Claude API spend, last 30 days">
               ~${last30DaysCost.toFixed(2)} / 30d
             </span>
           </div>
           {recentSourcing.length === 0 ? (
-            <p className="text-sm text-slate-400">No sourcing runs yet. The daily cron job will populate this.</p>
+            <p className="text-sm text-fg-subtle">No sourcing runs yet. The daily cron job will populate this.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {recentSourcing.map((run) => (
                 <li key={run.id} className="flex items-center justify-between gap-2">
-                  <span className="text-slate-600 truncate">{run.region}</span>
-                  <span className={`shrink-0 ${run.error ? "text-red-600" : "text-slate-500"}`}>
+                  <span className="text-fg-muted truncate">{run.region}</span>
+                  <span className={`shrink-0 ${run.error ? "text-red-600" : "text-fg-muted"}`}>
                     {run.error
                       ? "error"
                       : `+${run.leadsAdded} of ${run.candidates}${
@@ -100,20 +100,20 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-4">
-        <h2 className="text-sm font-medium text-slate-700 mb-3">Pipeline breakdown</h2>
+      <div className="bg-surface border border-line rounded-xl p-4">
+        <h2 className="text-sm font-medium text-fg mb-3">Pipeline breakdown</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
           {STATUS_ORDER.map((status) => (
             <Link
               href={`/leads?status=${status}`}
               key={status}
-              className="border border-slate-200 rounded-lg p-3 hover:border-brand-300 hover:bg-brand-50/40 transition-colors"
+              className="border border-line rounded-lg p-3 hover:border-brand-300 hover:bg-brand-50/40 transition-colors"
             >
               <div className="mb-1">
                 <StatusBadge status={status} />
               </div>
-              <p className="text-lg font-semibold text-slate-900">{byStatus[status]}</p>
-              <p className="text-[11px] text-slate-400">{STATUS_LABELS[status]}</p>
+              <p className="text-lg font-semibold text-fg">{byStatus[status]}</p>
+              <p className="text-[11px] text-fg-subtle">{STATUS_LABELS[status]}</p>
             </Link>
           ))}
         </div>

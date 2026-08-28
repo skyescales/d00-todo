@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -20,9 +21,9 @@ export default function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 bg-white border-b border-slate-200">
+    <header className="sticky top-0 z-20 bg-surface border-b border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-14 gap-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900 shrink-0">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-fg shrink-0">
           <span className="h-7 w-7 rounded-lg bg-brand-600 text-white flex items-center justify-center text-sm font-bold">
             G
           </span>
@@ -36,7 +37,7 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  active ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-100"
+                  active ? "bg-brand-50 text-brand-700" : "text-fg-muted hover:bg-surface-muted"
                 }`}
               >
                 {link.label}
@@ -44,7 +45,8 @@ export default function NavBar() {
             );
           })}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
+          <ThemeSwitcher />
           <Link
             href="/leads/new"
             className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 transition-colors"
@@ -53,7 +55,7 @@ export default function NavBar() {
           </Link>
           <button
             onClick={logout}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-fg-muted hover:bg-surface-muted transition-colors"
           >
             Sign out
           </button>

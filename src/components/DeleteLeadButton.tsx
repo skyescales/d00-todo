@@ -21,7 +21,7 @@ export default function DeleteLeadButton({ leadId, businessName }: { leadId: str
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="text-slate-600">Delete {businessName}?</span>
+      <span className="text-fg-muted">Delete {businessName}?</span>
       <button
         disabled={deleting}
         onClick={async () => {
@@ -34,7 +34,7 @@ export default function DeleteLeadButton({ leadId, businessName }: { leadId: str
       >
         {deleting ? "Deleting…" : "Confirm"}
       </button>
-      <button onClick={() => setConfirming(false)} className="text-slate-500 hover:text-slate-700">
+      <button onClick={() => setConfirming(false)} className="text-fg-muted hover:text-fg">
         Cancel
       </button>
     </div>
