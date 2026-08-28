@@ -60,7 +60,7 @@ Visit `http://localhost:3000`, log in with `APP_PASSWORD`.
    npx prisma db push
    ```
 6. **Deploy.** Vercel will pick up `vercel.json`, which schedules `/api/cron/source-leads` to run daily at 12:00 UTC. Adjust the cron schedule in `vercel.json` if you want a different time.
-7. **Function duration.** Claude's research for one region can involve dozens of web searches/fetches and take a few minutes wall-clock. `maxDuration` is set to 800s in the cron route, which requires a **Vercel Pro plan with Fluid Compute enabled** (Project Settings → Functions → Fluid Compute). On Hobby (60s cap) the cron will likely time out mid-research. If you want to stay on Hobby, lower `max_uses` in `src/lib/sourcing/research.ts` and `maxDuration` in the cron route to fit — expect fewer businesses surveyed per day as a tradeoff.
+7. **Function duration.** Claude's research for one region can involve dozens of web searches/fetches and take a few minutes wall-clock. `maxDuration` is set to 300s in the cron route (`src/app/api/cron/source-leads/route.ts`) — the maximum allowed on Vercel's free **Hobby** plan, so the default works with no paid plan required. If runs are regularly getting cut off mid-research, upgrade to **Pro** and enable **Fluid Compute** (Project Settings → Functions), which allows up to 800s — raise `maxDuration` accordingly once that's on.
 
 ### Automated sourcing (Claude + web search)
 
