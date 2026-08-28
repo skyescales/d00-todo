@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InstagramConfidence {
+  VERIFIED
+  NOT_FOUND
+}
+
+enum LeadStatus {
+  NEW
+  DM_SENT
+  CALLED
+  LEFT_VOICEMAIL
+  NO_ANSWER
+  REPLIED
+  LEFT_ON_READ
+  GHOSTED
+  NOT_INTERESTED
+  NOT_A_FIT
+  DEAD
+  FOLLOW_UP_SCHEDULED
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+model Lead {
+  id      String @id @default(cuid())
+
+  businessName String
+  // lowercased/trimmed copies used for dedup lookups
+  businessNameKey String
+  city            String
+  cityKey         String
+
+  websiteUrl   String?
+  socialOnly   Boolean @default(false)
+
+  instagram           String?
+  // How confident we are in `instagram`: VERIFIED when auto-research found
+  // and matched a real profile, or a human entered/edited it by hand;
+  // NOT_FOUND when auto-research looked and came up empty. Null means no
+  // automated search has been attempted (e.g. a plain manual entry with no
+  // Instagram filled in yet).
+  instagramConfidence InstagramConfidence?
+  phone        String?
+  ownerName    String?
+
+  weaknessNotes String? @db.Text
+
+  // structured size/credibility signals
+  reviewCount       Int?
+  rating            Float?
+  yearsInBusiness    Int?
+  estimatedMembers  Int?
+  sizeNotes         String? @db.Text
+
+  source String?
+
+  status          LeadStatus @default(NEW)
+  lastContactDate DateTime?
+
+  dateAdded DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  autoSourced Boolean @default(false)
+
+  notes Note[]
+
+  @@unique([businessNameKey, cityKey])
+  @@index([status])
+  @@index([city])
+  @@index([dateAdded])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// Tracks daily-cron region rotation so coverage spreads across all of
+// Florida over time instead of repeating the same metro areas.
+model SourcingRun {
+  id          String   @id @default(cuid())
+  region      String
+  ranAt       DateTime @default(now())
+  candidates  Int      @default(0)
+  leadsAdded  Int      @default(0)
+  emailSent   Boolean  @default(false)
+  error       String?  @db.Text
+
+  // Claude API usage for this run, so real spend is visible in-app.
+  model            String?
+  inputTokens      Int?
+  outputTokens     Int?
+  webSearches      Int?
+  estimatedCostUsd Float?
+}
