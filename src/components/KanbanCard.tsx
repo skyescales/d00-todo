@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { SerializedLead } from "@/types/lead";
+import InstagramSearchButton from "@/components/InstagramSearchButton";
 
 function igUrl(handle: string) {
   if (handle.startsWith("http")) return handle;
@@ -38,7 +39,7 @@ export default function KanbanCard({
             📞
           </a>
         )}
-        {lead.instagram && (
+        {lead.instagram ? (
           <a
             href={igUrl(lead.instagram)}
             target="_blank"
@@ -48,6 +49,8 @@ export default function KanbanCard({
           >
             📷
           </a>
+        ) : (
+          <InstagramSearchButton businessName={lead.businessName} city={lead.city} compact />
         )}
         <span className="ml-auto text-[11px] text-slate-400">
           {new Date(lead.dateAdded).toLocaleDateString(undefined, { month: "short", day: "numeric" })}

@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
 import { leadKeys } from "@/lib/dedupe";
 import { FLORIDA_REGIONS } from "./regions";
-import { fetchCandidatesForRegion, findInstagramFromWebsite } from "./googlePlaces";
-import { qualify } from "./qualify";
+import { researchRegion } from "./research";
+import { isKnownChain } from "./qualify";
 import { sendDailyLeadEmail } from "@/lib/email";
 import type { Lead } from "@prisma/client";
 
@@ -34,54 +34,65 @@ async function pickNextRegion(): Promise<string> {
 }
 
 export async function runDailySourcing() {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   const region = await pickNextRegion();
 
   if (!apiKey) {
     await prisma.sourcingRun.create({
-      data: { region, candidates: 0, leadsAdded: 0, error: "GOOGLE_PLACES_API_KEY not configured" },
+      data: { region, candidates: 0, leadsAdded: 0, error: "ANTHROPIC_API_KEY not configured" },
     });
-    return { region, candidates: 0, added: 0, error: "GOOGLE_PLACES_API_KEY not configured" };
+    return { region, candidates: 0, added: 0, error: "ANTHROPIC_API_KEY not configured" };
   }
 
-  let candidates: Awaited<ReturnType<typeof fetchCandidatesForRegion>> = [];
+  // Give the model a short "already tracked" list so it doesn't waste
+  // research budget re-suggesting businesses we already have for this area.
+  const existingInRegion = await prisma.lead.findMany({
+    where: { city: { equals: region, mode: "insensitive" } },
+    select: { businessName: true },
+    take: 200,
+  });
+  const knownNames = existingInRegion.map((l) => l.businessName);
+
+  let researched: Awaited<ReturnType<typeof researchRegion>>;
   try {
-    candidates = await fetchCandidatesForRegion(region, apiKey);
+    researched = await researchRegion(region, knownNames);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "unknown error fetching candidates";
+    const message = err instanceof Error ? err.message : "unknown error researching leads";
     await prisma.sourcingRun.create({ data: { region, candidates: 0, leadsAdded: 0, error: message } });
     return { region, candidates: 0, added: 0, error: message };
   }
 
   const addedLeads: Lead[] = [];
 
-  for (const candidate of candidates) {
-    const result = qualify(candidate);
-    if (!result.qualifies) continue;
+  for (const candidate of researched.leads) {
+    if (isKnownChain(candidate.businessName)) continue;
 
-    const { businessNameKey, cityKey } = leadKeys(candidate.name, region);
+    const city = candidate.city || region;
+    const { businessNameKey, cityKey } = leadKeys(candidate.businessName, city);
     const existing = await prisma.lead.findUnique({
       where: { businessNameKey_cityKey: { businessNameKey, cityKey } },
     });
     if (existing) continue;
 
-    const instagram = candidate.website ? await findInstagramFromWebsite(candidate.website) : null;
-
     const lead = await prisma.lead.create({
       data: {
-        businessName: candidate.name,
+        businessName: candidate.businessName,
         businessNameKey,
-        city: region,
+        city,
         cityKey,
-        websiteUrl: candidate.website ?? null,
-        socialOnly: !candidate.website,
-        instagram,
-        phone: candidate.phone ?? null,
-        weaknessNotes: result.weaknessNotes,
-        reviewCount: candidate.userRatingsTotal ?? null,
-        rating: candidate.rating ?? null,
-        sizeNotes: result.sizeNotes,
-        source: "Automated daily scan (Google Places)",
+        websiteUrl: candidate.websiteUrl,
+        socialOnly: candidate.socialOnly,
+        instagram: candidate.instagram,
+        instagramConfidence: candidate.instagramConfidence,
+        phone: candidate.phone,
+        ownerName: candidate.ownerName,
+        weaknessNotes: candidate.weaknessNotes,
+        reviewCount: candidate.reviewCount,
+        rating: candidate.rating,
+        yearsInBusiness: candidate.yearsInBusiness,
+        estimatedMembers: candidate.estimatedMembers,
+        sizeNotes: candidate.sizeNotes,
+        source: candidate.sourceNotes,
         status: "NEW",
         autoSourced: true,
       },
@@ -94,11 +105,22 @@ export async function runDailySourcing() {
   await prisma.sourcingRun.create({
     data: {
       region,
-      candidates: candidates.length,
+      candidates: researched.leads.length,
       leadsAdded: addedLeads.length,
       emailSent: emailResult.sent,
+      model: researched.usage.model,
+      inputTokens: researched.usage.inputTokens,
+      outputTokens: researched.usage.outputTokens,
+      webSearches: researched.usage.webSearches,
+      estimatedCostUsd: researched.usage.estimatedCostUsd,
     },
   });
 
-  return { region, candidates: candidates.length, added: addedLeads.length, email: emailResult };
+  return {
+    region,
+    candidates: researched.leads.length,
+    added: addedLeads.length,
+    estimatedCostUsd: researched.usage.estimatedCostUsd,
+    email: emailResult,
+  };
 }

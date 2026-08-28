@@ -15,7 +15,7 @@ Built with Next.js (App Router) + TypeScript + Tailwind CSS + Prisma/Postgres.
 - **Add/edit form** covering every field in the data model, plus a **bulk CSV import** (paste or upload) with duplicate detection.
 - **Quick actions** — `tel:` click-to-call, Instagram click-to-DM, inline status dropdown, append-only timestamped notes log.
 - **Dedup** — Business Name + City is unique; duplicates are rejected/skipped with a clear message.
-- **Automated daily sourcing** — a cron route sweeps a rotating Florida metro area every day via the Google Places API, applies weak-marketing + affordability heuristics, and inserts qualifying leads with `Status = New`.
+- **Automated daily sourcing** — a cron route hands Claude a rotating Florida metro area every day and lets it actually research the web (search + read gym websites, Google Business Profiles, Instagram) the way a human prospector would, judge weak-marketing + affordability signals itself, and insert qualifying leads with `Status = New`. It actively searches for each lead's real Instagram handle and flags whether it found one (`verified`) or not (`not_found`) — unfound ones get a one-click "Search Instagram" button in the UI instead of a guess.
 - **Daily email summary** of newly-added leads via Resend (optional — skipped gracefully if not configured).
 - **Single-user password gate** — no accounts, just one shared password behind signed-cookie middleware.
 
@@ -25,7 +25,7 @@ Built with Next.js (App Router) + TypeScript + Tailwind CSS + Prisma/Postgres.
 - Tailwind CSS
 - Prisma ORM + PostgreSQL (works with Vercel Postgres, Supabase, Neon, Railway, etc.)
 - Resend for the daily email summary (optional)
-- Google Places API for automated lead sourcing (optional but required for the sourcing job to find leads)
+- Anthropic API (Claude + the web search / web fetch tools) for automated lead sourcing — required for the sourcing job to find leads; see [Cost](#automated-sourcing-claude--web-search) below before turning it on
 
 ## Local development
 
@@ -52,23 +52,35 @@ Visit `http://localhost:3000`, log in with `APP_PASSWORD`.
    - `APP_PASSWORD` — the password you'll use to log in
    - `AUTH_SECRET` — any long random string (`openssl rand -hex 32`)
    - `CRON_SECRET` — any long random string (`openssl rand -hex 32`); Vercel Cron sends this automatically once set
-   - `GOOGLE_PLACES_API_KEY` — optional, needed for automated lead sourcing to actually find leads (see below)
+   - `ANTHROPIC_API_KEY` — **leave this unset until you've read the cost section below.** Without it, the cron job runs on schedule but is a harmless no-op (it logs "not configured" and exits — no research, no cost). Add the key only once you're ready to start spending.
+   - `SOURCING_MODEL` — optional, defaults to `claude-opus-5`; set to `claude-sonnet-5` for roughly half the cost (see below)
    - `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO` — optional, needed for the daily email summary
 5. **Push the schema to your database.** After the first deploy, run once from your machine (with `DATABASE_URL` pointed at the production database):
    ```bash
    npx prisma db push
    ```
 6. **Deploy.** Vercel will pick up `vercel.json`, which schedules `/api/cron/source-leads` to run daily at 12:00 UTC. Adjust the cron schedule in `vercel.json` if you want a different time.
+7. **Function duration.** Claude's research for one region can involve dozens of web searches/fetches and take a few minutes wall-clock. `maxDuration` is set to 800s in the cron route, which requires a **Vercel Pro plan with Fluid Compute enabled** (Project Settings → Functions → Fluid Compute). On Hobby (60s cap) the cron will likely time out mid-research. If you want to stay on Hobby, lower `max_uses` in `src/lib/sourcing/research.ts` and `maxDuration` in the cron route to fit — expect fewer businesses surveyed per day as a tradeoff.
 
-### Google Places API setup (for automated sourcing)
+### Automated sourcing (Claude + web search)
 
-1. In the [Google Cloud Console](https://console.cloud.google.com/), create a project (or reuse one) and enable the **Places API**.
-2. Create an API key and restrict it to the Places API.
-3. Set `GOOGLE_PLACES_API_KEY` in your Vercel env vars.
+1. Get an API key at [console.anthropic.com](https://console.anthropic.com) → API Keys.
+2. Set `ANTHROPIC_API_KEY` in your Vercel env vars once you're ready to turn sourcing on.
 
-The daily job rotates through ~60 Florida metro areas (`src/lib/sourcing/regions.ts`), picking whichever region hasn't been searched in the longest time, so the whole state gets covered over time instead of the same cities repeating. For each candidate it fetches Places details (website, phone, rating, review count), applies a qualification heuristic (`src/lib/sourcing/qualify.ts`) — excludes known national chains, requires a gym/fitness/martial-arts keyword match, requires a weak-marketing signal (no real website or a thin review profile) *and* an affordability signal (15–500 reviews, 3.7+ rating) — and best-effort scrapes the business's own website for an Instagram link.
+The daily job rotates through ~60 Florida metro areas (`src/lib/sourcing/regions.ts`), picking whichever region hasn't been searched in the longest time so the whole state gets covered over time instead of the same cities repeating. For that region, `src/lib/sourcing/research.ts` gives Claude the `web_search` and `web_fetch` tools and a detailed brief: survey roughly 50-100 candidate gyms/studios, judge each against the independently-owned / weak-marketing / affordability criteria itself (reading actual websites, reviews, and social activity rather than scoring a fixed data structure), and actively search for each qualifier's real Instagram handle rather than guessing one. A small local safety net (`src/lib/sourcing/qualify.ts`) still rejects anything matching a known national-chain name before insertion.
 
-These are heuristics, not guarantees — skim new auto-sourced leads before diving into outreach, same as you would a manually-researched one.
+This is model judgment, not a guarantee — skim new auto-sourced leads before diving into outreach, same as you would a manually-researched one. Every field it filled in (weakness notes, size signals, source notes) is there so you can sanity-check its reasoning at a glance.
+
+#### Cost
+
+Web search costs **$10 per 1,000 searches** plus standard token costs for search-generated content; web fetch has no extra charge beyond token costs. One daily run budgets up to 30 searches and 20 fetches surveying ~50-100 businesses. Based on that budget:
+
+| Model | Est. cost / day | Est. cost / month (30 runs) |
+|---|---|---|
+| `claude-opus-5` (default) | ~$0.50–$2.00 | ~$15–$60 |
+| `claude-sonnet-5` (`SOURCING_MODEL=claude-sonnet-5`) | ~$0.25–$1.00 | ~$8–$30 |
+
+These are estimates, not guarantees — actual spend depends on how much the model decides to search and read on a given day. Real numbers are logged per run (tokens, search count, estimated cost) to the `SourcingRun` table and shown on the dashboard under "Latest auto-sourcing runs", including a rolling 30-day total. For billing-accurate numbers, check the [Anthropic Console usage page](https://console.anthropic.com/settings/usage). If cost matters more than thoroughness, lower `MAX_WEB_SEARCHES`/`MAX_WEB_FETCHES` in `src/lib/sourcing/research.ts` or switch to `claude-sonnet-5`.
 
 ### Resend setup (for the daily email summary)
 
@@ -86,7 +98,7 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://your-app.vercel.app/api/cro
 
 ## Data model
 
-Each lead has: business name, city/area, website (or social-only flag), Instagram, phone, owner/manager name, marketing weakness notes, size/credibility signals (review count, rating, years in business, estimated members), source, date added, status, last contact date, and an append-only notes/activity log.
+Each lead has: business name, city/area, website (or social-only flag), Instagram (plus a confidence flag — `verified` when auto-research found and matched a real profile or a human entered it, `not_found` when auto-research looked and couldn't confirm one), phone, owner/manager name, marketing weakness notes, size/credibility signals (review count, rating, years in business, estimated members), source, date added, status, last contact date, and an append-only notes/activity log.
 
 Status pipeline: `New → DM Sent / Called → Left Voicemail / No Answer / Replied / Left on Read / Ghosted → Follow Up Scheduled → Not Interested / Not a Fit / Dead → Closed–Won / Closed–Lost`.
 

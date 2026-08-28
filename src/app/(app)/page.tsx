@@ -8,12 +8,20 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [total, byStatusRaw, leads, recentSourcing] = await Promise.all([
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [total, byStatusRaw, leads, recentSourcing, costAgg] = await Promise.all([
     prisma.lead.count(),
     prisma.lead.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.lead.findMany({ select: { dateAdded: true, status: true } }),
     prisma.sourcingRun.findMany({ orderBy: { ranAt: "desc" }, take: 5 }),
+    prisma.sourcingRun.aggregate({
+      where: { ranAt: { gte: thirtyDaysAgo } },
+      _sum: { estimatedCostUsd: true },
+    }),
   ]);
+  const last30DaysCost = costAgg._sum.estimatedCostUsd ?? 0;
 
   const byStatus: Record<string, number> = Object.fromEntries(STATUS_ORDER.map((s) => [s, 0]));
   for (const row of byStatusRaw) byStatus[row.status] = row._count._all;
@@ -65,16 +73,25 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-4">
-          <h2 className="text-sm font-medium text-slate-700 mb-3">Latest auto-sourcing runs</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-slate-700">Latest auto-sourcing runs</h2>
+            <span className="text-xs text-slate-400" title="Estimated Claude API spend, last 30 days">
+              ~${last30DaysCost.toFixed(2)} / 30d
+            </span>
+          </div>
           {recentSourcing.length === 0 ? (
             <p className="text-sm text-slate-400">No sourcing runs yet. The daily cron job will populate this.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {recentSourcing.map((run) => (
-                <li key={run.id} className="flex items-center justify-between">
-                  <span className="text-slate-600">{run.region}</span>
-                  <span className={run.error ? "text-red-600" : "text-slate-500"}>
-                    {run.error ? "error" : `+${run.leadsAdded} of ${run.candidates}`}
+                <li key={run.id} className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600 truncate">{run.region}</span>
+                  <span className={`shrink-0 ${run.error ? "text-red-600" : "text-slate-500"}`}>
+                    {run.error
+                      ? "error"
+                      : `+${run.leadsAdded} of ${run.candidates}${
+                          run.estimatedCostUsd != null ? ` · $${run.estimatedCostUsd.toFixed(2)}` : ""
+                        }`}
                   </span>
                 </li>
               ))}

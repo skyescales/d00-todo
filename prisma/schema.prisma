@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum InstagramConfidence {
+  VERIFIED
+  NOT_FOUND
+}
+
 enum LeadStatus {
   NEW
   DM_SENT
@@ -36,7 +41,13 @@ model Lead {
   websiteUrl   String?
   socialOnly   Boolean @default(false)
 
-  instagram    String?
+  instagram           String?
+  // How confident we are in `instagram`: VERIFIED when auto-research found
+  // and matched a real profile, or a human entered/edited it by hand;
+  // NOT_FOUND when auto-research looked and came up empty. Null means no
+  // automated search has been attempted (e.g. a plain manual entry with no
+  // Instagram filled in yet).
+  instagramConfidence InstagramConfidence?
   phone        String?
   ownerName    String?
 
@@ -88,4 +99,11 @@ model SourcingRun {
   leadsAdded  Int      @default(0)
   emailSent   Boolean  @default(false)
   error       String?  @db.Text
+
+  // Claude API usage for this run, so real spend is visible in-app.
+  model            String?
+  inputTokens      Int?
+  outputTokens     Int?
+  webSearches      Int?
+  estimatedCostUsd Float?
 }

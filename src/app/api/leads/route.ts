@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const instagram = body.instagram?.trim() || null;
+
   const lead = await prisma.lead.create({
     data: {
       businessName: body.businessName.trim(),
@@ -63,7 +65,9 @@ export async function POST(req: NextRequest) {
       cityKey,
       websiteUrl: body.socialOnly ? null : (body.websiteUrl?.trim() || null),
       socialOnly: Boolean(body.socialOnly),
-      instagram: body.instagram?.trim() || null,
+      instagram,
+      // A human filled this in by hand - treat it as verified.
+      instagramConfidence: instagram ? "VERIFIED" : null,
       phone: body.phone?.trim() || null,
       ownerName: body.ownerName?.trim() || null,
       weaknessNotes: body.weaknessNotes?.trim() || null,

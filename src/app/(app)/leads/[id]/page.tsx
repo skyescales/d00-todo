@@ -4,6 +4,7 @@ import LeadForm from "@/components/LeadForm";
 import NotesLog from "@/components/NotesLog";
 import StatusBadge from "@/components/StatusBadge";
 import DeleteLeadButton from "@/components/DeleteLeadButton";
+import InstagramSearchButton from "@/components/InstagramSearchButton";
 import type { SerializedLead, SerializedNote } from "@/types/lead";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,9 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             <StatusBadge status={lead.status} />
           </div>
           <p className="text-sm text-slate-500 mt-1">{lead.city}, FL</p>
+          {!lead.instagram && lead.instagramConfidence === "NOT_FOUND" && (
+            <p className="text-xs text-amber-600 mt-1">Auto-research looked for an Instagram and couldn&apos;t confirm one.</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {lead.phone && (
@@ -46,7 +50,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               📞 Call
             </a>
           )}
-          {lead.instagram && (
+          {lead.instagram ? (
             <a
               href={igUrl(lead.instagram)}
               target="_blank"
@@ -55,6 +59,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             >
               📷 DM
             </a>
+          ) : (
+            <InstagramSearchButton businessName={lead.businessName} city={lead.city} />
           )}
           {lead.websiteUrl && (
             <a

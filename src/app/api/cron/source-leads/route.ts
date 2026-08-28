@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { runDailySourcing } from "@/lib/sourcing";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // allow the Places sweep + details calls room to run
+// Claude research (dozens of web searches/fetches) can run several minutes.
+// 800s requires a Vercel Pro plan with Fluid Compute enabled - see README.
+export const maxDuration = 800;
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;

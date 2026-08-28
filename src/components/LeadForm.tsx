@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SerializedLead } from "@/types/lead";
 import { STATUS_ORDER, STATUS_LABELS } from "@/lib/statuses";
 import type { LeadStatus } from "@prisma/client";
+import InstagramSearchButton from "@/components/InstagramSearchButton";
 
 type FormState = {
   businessName: string;
@@ -144,12 +145,17 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
             />
           </Field>
           <Field label="Instagram">
-            <input
-              value={form.instagram}
-              onChange={(e) => set("instagram", e.target.value)}
-              className="input"
-              placeholder="@handle or full URL"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                value={form.instagram}
+                onChange={(e) => set("instagram", e.target.value)}
+                className="input"
+                placeholder="@handle or full URL"
+              />
+              {!form.instagram && form.businessName && form.city && (
+                <InstagramSearchButton businessName={form.businessName} city={form.city} compact />
+              )}
+            </div>
           </Field>
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-600">

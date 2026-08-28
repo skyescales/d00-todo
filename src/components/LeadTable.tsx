@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { SerializedLead } from "@/types/lead";
 import StatusSelect from "@/components/StatusSelect";
+import InstagramSearchButton from "@/components/InstagramSearchButton";
 
 function igUrl(handle: string) {
   if (handle.startsWith("http")) return handle;
@@ -87,7 +88,7 @@ export default function LeadTable({
                       📞
                     </a>
                   )}
-                  {lead.instagram && (
+                  {lead.instagram ? (
                     <a
                       href={igUrl(lead.instagram)}
                       target="_blank"
@@ -97,6 +98,8 @@ export default function LeadTable({
                     >
                       📷
                     </a>
+                  ) : (
+                    <InstagramSearchButton businessName={lead.businessName} city={lead.city} compact />
                   )}
                   {lead.websiteUrl && (
                     <a

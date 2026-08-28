@@ -47,7 +47,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   if ("socialOnly" in body) data.socialOnly = Boolean(body.socialOnly);
   if ("websiteUrl" in body) data.websiteUrl = data.socialOnly ? null : (body.websiteUrl?.trim() || null);
-  if ("instagram" in body) data.instagram = body.instagram?.trim() || null;
+  if ("instagram" in body) {
+    const instagram = body.instagram?.trim() || null;
+    data.instagram = instagram;
+    // A human editing this field by hand is treated as a verified value;
+    // clearing it back out clears the confidence flag too.
+    data.instagramConfidence = instagram ? "VERIFIED" : null;
+  }
   if ("phone" in body) data.phone = body.phone?.trim() || null;
   if ("ownerName" in body) data.ownerName = body.ownerName?.trim() || null;
   if ("weaknessNotes" in body) data.weaknessNotes = body.weaknessNotes?.trim() || null;
