@@ -34,22 +34,23 @@ export const STATUS_LABELS: Record<LeadStatus, string> = {
   CLOSED_LOST: "Closed – Lost",
 };
 
-// Tailwind class pairs (bg/text/border) per status, kept muted & consistent.
+// Tailwind class pairs (bg/text/border) per status - solid, saturated colors
+// so each stage is instantly distinguishable at a glance (not muted pastels).
 export const STATUS_STYLES: Record<LeadStatus, string> = {
-  NEW: "bg-slate-100 text-slate-700 border-slate-200",
-  DM_SENT: "bg-sky-50 text-sky-700 border-sky-200",
-  CALLED: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  LEFT_VOICEMAIL: "bg-violet-50 text-violet-700 border-violet-200",
-  NO_ANSWER: "bg-amber-50 text-amber-700 border-amber-200",
-  REPLIED: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  LEFT_ON_READ: "bg-orange-50 text-orange-700 border-orange-200",
-  GHOSTED: "bg-stone-100 text-stone-600 border-stone-200",
-  FOLLOW_UP_SCHEDULED: "bg-teal-50 text-teal-700 border-teal-200",
-  NOT_INTERESTED: "bg-rose-50 text-rose-700 border-rose-200",
-  NOT_A_FIT: "bg-rose-50 text-rose-700 border-rose-200",
-  DEAD: "bg-gray-200 text-gray-600 border-gray-300",
-  CLOSED_WON: "bg-green-100 text-green-800 border-green-300",
-  CLOSED_LOST: "bg-red-100 text-red-700 border-red-300",
+  NEW: "bg-blue-600 text-white border-blue-700",
+  DM_SENT: "bg-cyan-600 text-white border-cyan-700",
+  CALLED: "bg-violet-600 text-white border-violet-700",
+  LEFT_VOICEMAIL: "bg-fuchsia-600 text-white border-fuchsia-700",
+  NO_ANSWER: "bg-amber-600 text-white border-amber-700",
+  REPLIED: "bg-emerald-600 text-white border-emerald-700",
+  LEFT_ON_READ: "bg-orange-600 text-white border-orange-700",
+  GHOSTED: "bg-zinc-600 text-white border-zinc-700",
+  FOLLOW_UP_SCHEDULED: "bg-teal-600 text-white border-teal-700",
+  NOT_INTERESTED: "bg-rose-600 text-white border-rose-700",
+  NOT_A_FIT: "bg-pink-600 text-white border-pink-700",
+  DEAD: "bg-neutral-800 text-white border-neutral-900",
+  CLOSED_WON: "bg-green-600 text-white border-green-700",
+  CLOSED_LOST: "bg-red-600 text-white border-red-700",
 };
 
 // Statuses that count as "contacted" for response-rate math.

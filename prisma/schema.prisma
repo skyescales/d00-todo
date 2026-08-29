@@ -48,6 +48,7 @@ model Lead {
   // automated search has been attempted (e.g. a plain manual entry with no
   // Instagram filled in yet).
   instagramConfidence InstagramConfidence?
+  instagramFollowers  Int?
   phone        String?
   ownerName    String?
 

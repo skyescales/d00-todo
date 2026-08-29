@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
         socialOnly: Boolean(row.socialOnly),
         instagram,
         instagramConfidence: instagram ? "VERIFIED" : null,
+        instagramFollowers: row.instagramFollowers ?? null,
         phone: row.phone?.trim() || null,
         ownerName: row.ownerName?.trim() || null,
         weaknessNotes: row.weaknessNotes?.trim() || null,

@@ -5,6 +5,7 @@ export type ImportRow = {
   websiteUrl?: string;
   socialOnly?: boolean;
   instagram?: string;
+  instagramFollowers?: number;
   phone?: string;
   ownerName?: string;
   weaknessNotes?: string;
@@ -30,6 +31,9 @@ const HEADER_ALIASES: Record<string, keyof ImportRow> = {
   instagram: "instagram",
   ig: "instagram",
   instagramhandle: "instagram",
+  instagramfollowers: "instagramFollowers",
+  followers: "instagramFollowers",
+  igfollowers: "instagramFollowers",
   phone: "phone",
   phonenumber: "phone",
   owner: "ownerName",
@@ -69,7 +73,12 @@ export function mapCsvRow(raw: Record<string, string>): {
     const v = String(value).trim();
     if (v === "") continue;
 
-    if (canonical === "reviewCount" || canonical === "yearsInBusiness" || canonical === "estimatedMembers") {
+    if (
+      canonical === "reviewCount" ||
+      canonical === "yearsInBusiness" ||
+      canonical === "estimatedMembers" ||
+      canonical === "instagramFollowers"
+    ) {
       const n = parseInt(v.replace(/[^0-9]/g, ""), 10);
       if (!Number.isNaN(n)) mapped[canonical] = n;
     } else if (canonical === "rating") {
@@ -102,6 +111,7 @@ export const IMPORT_TEMPLATE_HEADERS = [
   "City",
   "Website URL",
   "Instagram",
+  "Instagram Followers",
   "Phone",
   "Owner Name",
   "Weakness Notes",

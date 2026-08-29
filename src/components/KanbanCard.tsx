@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Phone } from "lucide-react";
+import InstagramIcon from "@/components/icons/InstagramIcon";
 import type { SerializedLead } from "@/types/lead";
 import InstagramSearchButton from "@/components/InstagramSearchButton";
+import IconCircle from "@/components/IconCircle";
+import Tooltip from "@/components/Tooltip";
+import { formatFollowers } from "@/lib/format";
 
 function igUrl(handle: string) {
   if (handle.startsWith("http")) return handle;
@@ -31,24 +36,22 @@ export default function KanbanCard({
       )}
       <div className="flex items-center gap-1.5 mt-2">
         {lead.phone && (
-          <a
-            href={`tel:${lead.phone}`}
-            className="h-6 w-6 flex items-center justify-center rounded-full bg-surface-muted hover:bg-brand-100 text-xs"
-            title="Call"
-          >
-            📞
+          <a href={`tel:${lead.phone}`} title="Call">
+            <IconCircle icon={Phone} variant="blue" size="sm" />
           </a>
         )}
         {lead.instagram ? (
-          <a
-            href={igUrl(lead.instagram)}
-            target="_blank"
-            rel="noreferrer"
-            className="h-6 w-6 flex items-center justify-center rounded-full bg-surface-muted hover:bg-pink-100 text-xs"
-            title="DM on Instagram"
+          <Tooltip
+            label={
+              lead.instagramFollowers != null
+                ? `${formatFollowers(lead.instagramFollowers)} followers`
+                : "DM on Instagram"
+            }
           >
-            📷
-          </a>
+            <a href={igUrl(lead.instagram)} target="_blank" rel="noreferrer">
+              <IconCircle icon={InstagramIcon} variant="pink" size="sm" />
+            </a>
+          </Tooltip>
         ) : (
           <InstagramSearchButton businessName={lead.businessName} city={lead.city} compact />
         )}

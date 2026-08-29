@@ -13,6 +13,7 @@ type FormState = {
   websiteUrl: string;
   socialOnly: boolean;
   instagram: string;
+  instagramFollowers: string;
   phone: string;
   ownerName: string;
   weaknessNotes: string;
@@ -32,6 +33,7 @@ function toFormState(lead?: SerializedLead): FormState {
     websiteUrl: lead?.websiteUrl ?? "",
     socialOnly: lead?.socialOnly ?? false,
     instagram: lead?.instagram ?? "",
+    instagramFollowers: lead?.instagramFollowers?.toString() ?? "",
     phone: lead?.phone ?? "",
     ownerName: lead?.ownerName ?? "",
     weaknessNotes: lead?.weaknessNotes ?? "",
@@ -67,6 +69,7 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
       websiteUrl: form.websiteUrl || null,
       socialOnly: form.socialOnly,
       instagram: form.instagram || null,
+      instagramFollowers: form.instagramFollowers ? parseInt(form.instagramFollowers, 10) : null,
       phone: form.phone || null,
       ownerName: form.ownerName || null,
       weaknessNotes: form.weaknessNotes || null,
@@ -156,6 +159,15 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
                 <InstagramSearchButton businessName={form.businessName} city={form.city} compact />
               )}
             </div>
+          </Field>
+          <Field label="Instagram Followers">
+            <input
+              type="number"
+              value={form.instagramFollowers}
+              onChange={(e) => set("instagramFollowers", e.target.value)}
+              className="input"
+              placeholder="e.g. 2400"
+            />
           </Field>
         </div>
         <label className="flex items-center gap-2 text-sm text-fg-muted">

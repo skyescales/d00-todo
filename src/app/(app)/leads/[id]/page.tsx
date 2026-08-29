@@ -5,6 +5,9 @@ import NotesLog from "@/components/NotesLog";
 import StatusBadge from "@/components/StatusBadge";
 import DeleteLeadButton from "@/components/DeleteLeadButton";
 import InstagramSearchButton from "@/components/InstagramSearchButton";
+import { Phone, Globe } from "lucide-react";
+import InstagramIcon from "@/components/icons/InstagramIcon";
+import { formatFollowers } from "@/lib/format";
 import type { SerializedLead, SerializedNote } from "@/types/lead";
 
 export const dynamic = "force-dynamic";
@@ -46,8 +49,12 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
         </div>
         <div className="flex items-center gap-3">
           {lead.phone && (
-            <a href={`tel:${lead.phone}`} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-line">
-              📞 Call
+            <a
+              href={`tel:${lead.phone}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted transition-all duration-150 hover:scale-105 hover:bg-blue-600 hover:text-white"
+            >
+              <Phone className="h-4 w-4" strokeWidth={2} />
+              Call
             </a>
           )}
           {lead.instagram ? (
@@ -55,9 +62,11 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               href={igUrl(lead.instagram)}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-pink-100"
+              title={lead.instagramFollowers != null ? `${formatFollowers(lead.instagramFollowers)} followers` : undefined}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted transition-all duration-150 hover:scale-105 hover:bg-pink-600 hover:text-white"
             >
-              📷 DM
+              <InstagramIcon className="h-4 w-4" strokeWidth={2} />
+              DM{lead.instagramFollowers != null && ` · ${formatFollowers(lead.instagramFollowers)}`}
             </a>
           ) : (
             <InstagramSearchButton businessName={lead.businessName} city={lead.city} />
@@ -67,9 +76,10 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
               href={lead.websiteUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted hover:bg-line"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-surface-muted transition-all duration-150 hover:scale-105 hover:bg-line"
             >
-              🌐 Site
+              <Globe className="h-4 w-4" strokeWidth={2} />
+              Site
             </a>
           )}
         </div>

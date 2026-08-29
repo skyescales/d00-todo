@@ -19,6 +19,7 @@ export type LeadInput = {
   websiteUrl?: string | null;
   socialOnly?: boolean;
   instagram?: string | null;
+  instagramFollowers?: number | null;
   phone?: string | null;
   ownerName?: string | null;
   weaknessNotes?: string | null;

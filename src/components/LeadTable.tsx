@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { Phone, Globe } from "lucide-react";
+import InstagramIcon from "@/components/icons/InstagramIcon";
 import type { SerializedLead } from "@/types/lead";
 import StatusSelect from "@/components/StatusSelect";
 import InstagramSearchButton from "@/components/InstagramSearchButton";
+import IconCircle from "@/components/IconCircle";
+import Tooltip from "@/components/Tooltip";
+import { formatFollowers } from "@/lib/format";
 
 function igUrl(handle: string) {
   if (handle.startsWith("http")) return handle;
@@ -15,11 +20,13 @@ export default function LeadTable({
   sort,
   dir,
   onSort,
+  onStatusChanged,
 }: {
   leads: SerializedLead[];
   sort: string;
   dir: "asc" | "desc";
   onSort: (field: string) => void;
+  onStatusChanged?: () => void;
 }) {
   function SortHeader({ field, label }: { field: string; label: string }) {
     const active = sort === field;
@@ -80,42 +87,34 @@ export default function LeadTable({
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   {lead.phone && (
-                    <a
-                      href={`tel:${lead.phone}`}
-                      title={`Call ${lead.phone}`}
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-brand-100 text-fg-muted hover:text-brand-700"
-                    >
-                      📞
+                    <a href={`tel:${lead.phone}`} title={`Call ${lead.phone}`}>
+                      <IconCircle icon={Phone} variant="blue" />
                     </a>
                   )}
                   {lead.instagram ? (
-                    <a
-                      href={igUrl(lead.instagram)}
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Open Instagram"
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-pink-100 text-fg-muted hover:text-pink-600"
+                    <Tooltip
+                      label={
+                        lead.instagramFollowers != null
+                          ? `${formatFollowers(lead.instagramFollowers)} followers`
+                          : "Open Instagram"
+                      }
                     >
-                      📷
-                    </a>
+                      <a href={igUrl(lead.instagram)} target="_blank" rel="noreferrer">
+                        <IconCircle icon={InstagramIcon} variant="pink" />
+                      </a>
+                    </Tooltip>
                   ) : (
                     <InstagramSearchButton businessName={lead.businessName} city={lead.city} compact />
                   )}
                   {lead.websiteUrl && (
-                    <a
-                      href={lead.websiteUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Visit website"
-                      className="h-7 w-7 flex items-center justify-center rounded-full bg-surface-muted hover:bg-line text-fg-muted"
-                    >
-                      🌐
+                    <a href={lead.websiteUrl} target="_blank" rel="noreferrer" title="Visit website">
+                      <IconCircle icon={Globe} />
                     </a>
                   )}
                 </div>
               </td>
               <td className="px-4 py-3">
-                <StatusSelect leadId={lead.id} status={lead.status} />
+                <StatusSelect leadId={lead.id} status={lead.status} onChanged={onStatusChanged} />
               </td>
               <td className="px-4 py-3 text-fg-muted whitespace-nowrap">
                 {new Date(lead.dateAdded).toLocaleDateString()}

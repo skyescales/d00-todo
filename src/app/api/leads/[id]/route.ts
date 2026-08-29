@@ -54,6 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // clearing it back out clears the confidence flag too.
     data.instagramConfidence = instagram ? "VERIFIED" : null;
   }
+  if ("instagramFollowers" in body) data.instagramFollowers = body.instagramFollowers ?? null;
   if ("phone" in body) data.phone = body.phone?.trim() || null;
   if ("ownerName" in body) data.ownerName = body.ownerName?.trim() || null;
   if ("weaknessNotes" in body) data.weaknessNotes = body.weaknessNotes?.trim() || null;

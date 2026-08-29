@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
       instagram,
       // A human filled this in by hand - treat it as verified.
       instagramConfidence: instagram ? "VERIFIED" : null,
+      instagramFollowers: body.instagramFollowers ?? null,
       phone: body.phone?.trim() || null,
       ownerName: body.ownerName?.trim() || null,
       weaknessNotes: body.weaknessNotes?.trim() || null,

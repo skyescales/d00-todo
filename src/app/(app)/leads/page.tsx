@@ -8,6 +8,7 @@ import type { LeadStatus } from "@prisma/client";
 import { STATUS_ORDER, STATUS_LABELS } from "@/lib/statuses";
 import LeadTable from "@/components/LeadTable";
 import BulkImportModal from "@/components/BulkImportModal";
+import LeadsStatsBar from "@/components/LeadsStatsBar";
 
 function LeadsPageInner() {
   const router = useRouter();
@@ -78,6 +79,8 @@ function LeadsPageInner() {
         </div>
       </div>
 
+      <LeadsStatsBar refreshKey={refreshKey} />
+
       <div className="flex flex-wrap gap-3 bg-surface border border-line rounded-xl p-3">
         <input
           value={q}
@@ -128,7 +131,13 @@ function LeadsPageInner() {
           Loading…
         </div>
       ) : (
-        <LeadTable leads={leads} sort={sort} dir={dir} onSort={handleSort} />
+        <LeadTable
+          leads={leads}
+          sort={sort}
+          dir={dir}
+          onSort={handleSort}
+          onStatusChanged={() => setRefreshKey((k) => k + 1)}
+        />
       )}
 
       {showImport && (
