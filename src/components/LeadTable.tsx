@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Phone, Globe } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 import type { SerializedLead } from "@/types/lead";
+import type { LeadStatus } from "@prisma/client";
 import StatusSelect from "@/components/StatusSelect";
 import InstagramSearchButton from "@/components/InstagramSearchButton";
 import IconCircle from "@/components/IconCircle";
@@ -26,7 +27,7 @@ export default function LeadTable({
   sort: string;
   dir: "asc" | "desc";
   onSort: (field: string) => void;
-  onStatusChanged?: () => void;
+  onStatusChanged?: (leadId: string, status: LeadStatus) => void;
 }) {
   function SortHeader({ field, label }: { field: string; label: string }) {
     const active = sort === field;
@@ -114,7 +115,11 @@ export default function LeadTable({
                 </div>
               </td>
               <td className="px-4 py-3">
-                <StatusSelect leadId={lead.id} status={lead.status} onChanged={onStatusChanged} />
+                <StatusSelect
+                  leadId={lead.id}
+                  status={lead.status}
+                  onChanged={(status) => onStatusChanged?.(lead.id, status)}
+                />
               </td>
               <td className="px-4 py-3 text-fg-muted whitespace-nowrap">
                 {new Date(lead.dateAdded).toLocaleDateString()}

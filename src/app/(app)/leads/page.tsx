@@ -23,6 +23,9 @@ function LeadsPageInner() {
   const [dir, setDir] = useState<"asc" | "desc">((searchParams.get("dir") as "asc" | "desc") ?? "desc");
   const [showImport, setShowImport] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  // Separate from refreshKey: bumping this only refetches the stats bar, not
+  // the whole table - a per-row status change shouldn't reload/rescroll the list.
+  const [statsKey, setStatsKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -49,6 +52,11 @@ function LeadsPageInner() {
     () => Array.from(new Set(leads.map((l) => l.city))).sort(),
     [leads]
   );
+
+  function handleLeadStatusChanged(leadId: string, status: LeadStatus) {
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, status } : l)));
+    setStatsKey((k) => k + 1);
+  }
 
   function handleSort(field: string) {
     if (sort === field) {
@@ -79,7 +87,7 @@ function LeadsPageInner() {
         </div>
       </div>
 
-      <LeadsStatsBar refreshKey={refreshKey} />
+      <LeadsStatsBar refreshKey={refreshKey + statsKey} />
 
       <div className="flex flex-wrap gap-3 bg-surface border border-line rounded-xl p-3">
         <input
@@ -136,7 +144,7 @@ function LeadsPageInner() {
           sort={sort}
           dir={dir}
           onSort={handleSort}
-          onStatusChanged={() => setRefreshKey((k) => k + 1)}
+          onStatusChanged={handleLeadStatusChanged}
         />
       )}
 
