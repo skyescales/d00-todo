@@ -49,7 +49,7 @@ export default function LeadsStatsBar({ refreshKey }: { refreshKey: number }) {
           className={`flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-1 border ${STATUS_STYLES[status]}`}
           title={STATUS_LABELS[status]}
         >
-          <span className="h-5 min-w-5 px-1 rounded-full bg-black/20 flex items-center justify-center text-xs font-bold">
+          <span className="h-5 min-w-5 px-1 rounded-full bg-current/20 flex items-center justify-center text-xs font-bold">
             {stats.byStatus[status] ?? 0}
           </span>
           <span className="text-xs font-medium">{STATUS_LABELS[status]}</span>
