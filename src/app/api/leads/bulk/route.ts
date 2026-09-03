@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
     }
 
     const instagram = row.instagram?.trim() || null;
+    // Confidence: explicit CSV column wins; otherwise infer from whether a
+    // handle was given. A row researched and confirmed to have no Instagram
+    // starts life in the NOT_FOUND pipeline status instead of NEW, so it
+    // doesn't get mixed in with leads that still need a first look.
+    const instagramConfidence = row.instagramConfidence ?? (instagram ? "VERIFIED" : null);
+    const status = instagramConfidence === "NOT_FOUND" ? "NOT_FOUND" : "NEW";
 
     await prisma.lead.create({
       data: {
@@ -57,7 +63,7 @@ export async function POST(req: NextRequest) {
         websiteUrl: row.socialOnly ? null : row.websiteUrl?.trim() || null,
         socialOnly: Boolean(row.socialOnly),
         instagram,
-        instagramConfidence: instagram ? "VERIFIED" : null,
+        instagramConfidence,
         instagramFollowers: row.instagramFollowers ?? null,
         phone: row.phone?.trim() || null,
         ownerName: row.ownerName?.trim() || null,
@@ -68,7 +74,7 @@ export async function POST(req: NextRequest) {
         estimatedMembers: row.estimatedMembers ?? null,
         sizeNotes: row.sizeNotes?.trim() || null,
         source: row.source?.trim() || "CSV import",
-        status: "NEW",
+        status,
       },
     });
 

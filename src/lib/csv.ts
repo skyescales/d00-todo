@@ -5,6 +5,7 @@ export type ImportRow = {
   websiteUrl?: string;
   socialOnly?: boolean;
   instagram?: string;
+  instagramConfidence?: "VERIFIED" | "NOT_FOUND";
   instagramFollowers?: number;
   phone?: string;
   ownerName?: string;
@@ -34,6 +35,9 @@ const HEADER_ALIASES: Record<string, keyof ImportRow> = {
   instagramfollowers: "instagramFollowers",
   followers: "instagramFollowers",
   igfollowers: "instagramFollowers",
+  instagramconfidence: "instagramConfidence",
+  igconfidence: "instagramConfidence",
+  confidence: "instagramConfidence",
   phone: "phone",
   phonenumber: "phone",
   owner: "ownerName",
@@ -84,6 +88,9 @@ export function mapCsvRow(raw: Record<string, string>): {
     } else if (canonical === "rating") {
       const n = parseFloat(v);
       if (!Number.isNaN(n)) mapped.rating = n;
+    } else if (canonical === "instagramConfidence") {
+      if (/not.?found/i.test(v)) mapped.instagramConfidence = "NOT_FOUND";
+      else if (/verif/i.test(v)) mapped.instagramConfidence = "VERIFIED";
     } else if (canonical === "websiteUrl") {
       if (/^none/i.test(v) || /social only/i.test(v)) {
         mapped.socialOnly = true;
@@ -111,6 +118,7 @@ export const IMPORT_TEMPLATE_HEADERS = [
   "City",
   "Website URL",
   "Instagram",
+  "Instagram Confidence",
   "Instagram Followers",
   "Phone",
   "Owner Name",
