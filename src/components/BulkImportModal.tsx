@@ -7,6 +7,7 @@ import { mapCsvRow, IMPORT_TEMPLATE_HEADERS, type ImportRow } from "@/lib/csv";
 type ImportResult = {
   total: number;
   inserted: number;
+  updated: number;
   skippedDuplicates: { businessName: string; city: string }[];
   errors: { row: number; message: string }[];
 };
@@ -136,6 +137,13 @@ export default function BulkImportModal({
             <div className="space-y-3">
               <p className="text-sm text-fg">
                 Imported <strong>{result.inserted}</strong> of {result.total} rows.
+                {result.updated > 0 && (
+                  <>
+                    {" "}
+                    Backfilled Instagram data onto <strong>{result.updated}</strong> existing lead
+                    {result.updated === 1 ? "" : "s"}.
+                  </>
+                )}
               </p>
               {result.skippedDuplicates.length > 0 && (
                 <div className="text-xs text-fg-muted bg-surface-muted rounded-lg p-2">

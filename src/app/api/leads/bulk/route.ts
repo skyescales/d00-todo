@@ -6,6 +6,7 @@ import type { ImportRow } from "@/lib/csv";
 type Result = {
   total: number;
   inserted: number;
+  updated: number;
   skippedDuplicates: { businessName: string; city: string }[];
   errors: { row: number; message: string }[];
 };
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No rows provided." }, { status: 400 });
   }
 
-  const result: Result = { total: rows.length, inserted: 0, skippedDuplicates: [], errors: [] };
+  const result: Result = { total: rows.length, inserted: 0, updated: 0, skippedDuplicates: [], errors: [] };
 
   // Track keys seen within this batch too, so duplicate rows inside the
   // same CSV paste don't both get inserted.
@@ -37,15 +38,6 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
-    const existing = await prisma.lead.findUnique({
-      where: { businessNameKey_cityKey: { businessNameKey, cityKey } },
-    });
-    if (existing) {
-      result.skippedDuplicates.push({ businessName: row.businessName, city: row.city });
-      seenInBatch.add(batchKey);
-      continue;
-    }
-
     const instagram = row.instagram?.trim() || null;
     // Confidence: explicit CSV column wins; otherwise infer from whether a
     // handle was given. A row researched and confirmed to have no Instagram
@@ -53,6 +45,37 @@ export async function POST(req: NextRequest) {
     // doesn't get mixed in with leads that still need a first look.
     const instagramConfidence = row.instagramConfidence ?? (instagram ? "VERIFIED" : null);
     const status = instagramConfidence === "NOT_FOUND" ? "NOT_FOUND" : "NEW";
+
+    const existing = await prisma.lead.findUnique({
+      where: { businessNameKey_cityKey: { businessNameKey, cityKey } },
+    });
+    if (existing) {
+      // A lead with this name+city already exists, most often because it was
+      // first imported before Instagram research was done. Backfill the
+      // research onto it instead of silently skipping, but only touch fields
+      // the existing record doesn't already have a value for - never
+      // overwrite something a human already filled in or edited.
+      const backfill: Record<string, unknown> = {};
+      if (!existing.instagram && instagram) {
+        backfill.instagram = instagram;
+        backfill.instagramConfidence = instagramConfidence;
+        if (row.instagramFollowers != null) backfill.instagramFollowers = row.instagramFollowers;
+      } else if (!existing.instagramConfidence && instagramConfidence) {
+        backfill.instagramConfidence = instagramConfidence;
+      }
+      if (existing.status === "NEW" && status === "NOT_FOUND") {
+        backfill.status = "NOT_FOUND";
+      }
+
+      if (Object.keys(backfill).length > 0) {
+        await prisma.lead.update({ where: { id: existing.id }, data: backfill });
+        result.updated++;
+      } else {
+        result.skippedDuplicates.push({ businessName: row.businessName, city: row.city });
+      }
+      seenInBatch.add(batchKey);
+      continue;
+    }
 
     await prisma.lead.create({
       data: {
