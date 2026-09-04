@@ -19,6 +19,7 @@ function LeadsPageInner() {
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [status, setStatus] = useState(searchParams.get("status") ?? "");
   const [city, setCity] = useState(searchParams.get("city") ?? "");
+  const [source, setSource] = useState(searchParams.get("source") ?? "");
   const [sort, setSort] = useState(searchParams.get("sort") ?? "dateAdded");
   const [dir, setDir] = useState<"asc" | "desc">((searchParams.get("dir") as "asc" | "desc") ?? "desc");
   const [showImport, setShowImport] = useState(false);
@@ -33,6 +34,7 @@ function LeadsPageInner() {
       if (q) params.set("q", q);
       if (status) params.set("status", status);
       if (city) params.set("city", city);
+      if (source) params.set("source", source);
       params.set("sort", sort);
       params.set("dir", dir);
 
@@ -46,10 +48,14 @@ function LeadsPageInner() {
     }, 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, status, city, sort, dir, refreshKey]);
+  }, [q, status, city, source, sort, dir, refreshKey]);
 
   const cities = useMemo(
     () => Array.from(new Set(leads.map((l) => l.city))).sort(),
+    [leads]
+  );
+  const sources = useMemo(
+    () => Array.from(new Set(leads.map((l) => l.source).filter((s): s is string => Boolean(s)))).sort(),
     [leads]
   );
 
@@ -120,12 +126,25 @@ function LeadsPageInner() {
             </option>
           ))}
         </select>
-        {(q || status || city) && (
+        <select
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          className="rounded-lg border border-line bg-page text-fg px-3 py-2 text-sm"
+        >
+          <option value="">All lists</option>
+          {sources.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        {(q || status || city || source) && (
           <button
             onClick={() => {
               setQ("");
               setStatus("");
               setCity("");
+              setSource("");
             }}
             className="text-sm text-fg-muted hover:text-fg"
           >

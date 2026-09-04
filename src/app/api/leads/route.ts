@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q")?.trim();
   const status = searchParams.get("status");
   const city = searchParams.get("city");
+  const source = searchParams.get("source");
   const sort = searchParams.get("sort") ?? "dateAdded";
   const dir = searchParams.get("dir") === "asc" ? "asc" : "desc";
 
@@ -23,6 +24,9 @@ export async function GET(req: NextRequest) {
   }
   if (city) {
     where.city = { equals: city, mode: "insensitive" };
+  }
+  if (source) {
+    where.source = { equals: source, mode: "insensitive" };
   }
 
   const sortableFields = new Set(["dateAdded", "businessName", "city", "status", "lastContactDate"]);
