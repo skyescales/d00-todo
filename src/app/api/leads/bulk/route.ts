@@ -66,6 +66,13 @@ export async function POST(req: NextRequest) {
       if (existing.status === "NEW" && status === "NOT_FOUND") {
         backfill.status = "NOT_FOUND";
       }
+      // The "list" a lead belongs to (Source) is just an organizational tag,
+      // not researched data - safe to move a lead to a different list on
+      // purpose via a re-import, unlike instagram/status above.
+      const newSource = row.source?.trim();
+      if (newSource && newSource !== existing.source) {
+        backfill.source = newSource;
+      }
 
       if (Object.keys(backfill).length > 0) {
         await prisma.lead.update({ where: { id: existing.id }, data: backfill });
