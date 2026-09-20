@@ -12,6 +12,13 @@ enum InstagramConfidence {
   NOT_FOUND
 }
 
+enum OwnerConfidence {
+  HIGH
+  MEDIUM
+  LOW
+  NOT_FOUND
+}
+
 enum LeadStatus {
   NEW
   DM_SENT
@@ -52,6 +59,15 @@ model Lead {
   instagramFollowers  Int?
   phone        String?
   ownerName    String?
+  // How confident we are in `ownerName`, same VERIFIED/human-edit pattern as
+  // instagramConfidence: HIGH/MEDIUM/LOW when auto-research found a name (or
+  // a human entered/edited it by hand, which is always treated as HIGH),
+  // NOT_FOUND when auto-research looked and came up empty. Null means no
+  // owner research has been attempted yet.
+  ownerConfidence OwnerConfidence?
+  // Where the owner name came from - e.g. "Google", "Website", "LinkedIn",
+  // "Instagram", "Other". Free text so it can describe a manual find too.
+  ownerSource     String?
 
   weaknessNotes String? @db.Text
 

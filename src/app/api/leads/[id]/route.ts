@@ -3,6 +3,11 @@ import { prisma } from "@/lib/db";
 import { leadKeys } from "@/lib/dedupe";
 import { isLeadStatus } from "@/lib/statuses";
 
+const OWNER_CONFIDENCE_VALUES = new Set(["HIGH", "MEDIUM", "LOW", "NOT_FOUND"]);
+function isOwnerConfidence(value: unknown): value is "HIGH" | "MEDIUM" | "LOW" | "NOT_FOUND" {
+  return typeof value === "string" && OWNER_CONFIDENCE_VALUES.has(value);
+}
+
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const lead = await prisma.lead.findUnique({
     where: { id: params.id },
@@ -56,7 +61,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
   if ("instagramFollowers" in body) data.instagramFollowers = body.instagramFollowers ?? null;
   if ("phone" in body) data.phone = body.phone?.trim() || null;
-  if ("ownerName" in body) data.ownerName = body.ownerName?.trim() || null;
+  if ("ownerName" in body) {
+    const ownerName = body.ownerName?.trim() || null;
+    data.ownerName = ownerName;
+    if (ownerName) {
+      // A human typing a name in by hand is treated as the highest confidence.
+      data.ownerConfidence = "HIGH";
+      data.ownerSource = body.ownerSource?.trim() || existing.ownerSource || "Manual entry";
+    } else if (isOwnerConfidence(body.ownerConfidence)) {
+      // No name, but a confidence was explicitly set (e.g. marking research
+      // as "Not found") - keep that instead of wiping it out.
+      data.ownerConfidence = body.ownerConfidence;
+      data.ownerSource = body.ownerSource?.trim() || null;
+    } else {
+      data.ownerConfidence = null;
+      data.ownerSource = null;
+    }
+  } else if ("ownerSource" in body && existing.ownerName) {
+    data.ownerSource = body.ownerSource?.trim() || null;
+  }
   if ("weaknessNotes" in body) data.weaknessNotes = body.weaknessNotes?.trim() || null;
   if ("reviewCount" in body) data.reviewCount = body.reviewCount ?? null;
   if ("rating" in body) data.rating = body.rating ?? null;
