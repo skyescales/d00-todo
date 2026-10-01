@@ -16,10 +16,6 @@ function igUrl(handle: string) {
   return `https://instagram.com/${handle.replace(/^@/, "")}`;
 }
 
-function isMedspaLead(source?: string | null) {
-  return !!source && /medspa/i.test(source);
-}
-
 export default function LeadTable({
   leads,
   sort,
@@ -69,7 +65,6 @@ export default function LeadTable({
             <th className="px-4 py-3">
               <SortHeader field="status" label="Status" />
             </th>
-            <th className="px-4 py-3" title="Medspa lead"></th>
             <th className="px-4 py-3">
               <SortHeader field="dateAdded" label="Added" />
             </th>
@@ -125,16 +120,6 @@ export default function LeadTable({
                   status={lead.status}
                   onChanged={(status) => onStatusChanged?.(lead.id, status)}
                 />
-              </td>
-              <td className="px-4 py-3">
-                {isMedspaLead(lead.source) && (
-                  <Tooltip label="Medspa lead">
-                    <span
-                      className="block h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.7)]"
-                      aria-label="Medspa lead"
-                    />
-                  </Tooltip>
-                )}
               </td>
               <td className="px-4 py-3 text-fg-muted whitespace-nowrap">
                 {new Date(lead.dateAdded).toLocaleDateString()}

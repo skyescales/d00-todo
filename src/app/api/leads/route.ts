@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
   }
 
   const instagram = body.instagram?.trim() || null;
-  const ownerName = body.ownerName?.trim() || null;
 
   const lead = await prisma.lead.create({
     data: {
@@ -75,10 +74,7 @@ export async function POST(req: NextRequest) {
       instagramConfidence: instagram ? "VERIFIED" : null,
       instagramFollowers: body.instagramFollowers ?? null,
       phone: body.phone?.trim() || null,
-      ownerName,
-      // A human filled this in by hand - treat it as the highest confidence.
-      ownerConfidence: ownerName ? "HIGH" : null,
-      ownerSource: ownerName ? (body.ownerSource?.trim() || "Manual entry") : null,
+      ownerName: body.ownerName?.trim() || null,
       weaknessNotes: body.weaknessNotes?.trim() || null,
       reviewCount: body.reviewCount ?? null,
       rating: body.rating ?? null,

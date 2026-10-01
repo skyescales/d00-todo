@@ -9,8 +9,6 @@ export type ImportRow = {
   instagramFollowers?: number;
   phone?: string;
   ownerName?: string;
-  ownerConfidence?: "HIGH" | "MEDIUM" | "LOW" | "NOT_FOUND";
-  ownerSource?: string;
   weaknessNotes?: string;
   reviewCount?: number;
   rating?: number;
@@ -46,8 +44,6 @@ const HEADER_ALIASES: Record<string, keyof ImportRow> = {
   ownername: "ownerName",
   manager: "ownerName",
   ownermanagername: "ownerName",
-  ownerconfidence: "ownerConfidence",
-  ownersource: "ownerSource",
   weaknessnotes: "weaknessNotes",
   marketingweaknessnotes: "weaknessNotes",
   notes: "weaknessNotes",
@@ -95,11 +91,6 @@ export function mapCsvRow(raw: Record<string, string>): {
     } else if (canonical === "instagramConfidence") {
       if (/not.?found/i.test(v)) mapped.instagramConfidence = "NOT_FOUND";
       else if (/verif/i.test(v)) mapped.instagramConfidence = "VERIFIED";
-    } else if (canonical === "ownerConfidence") {
-      if (/not.?found/i.test(v)) mapped.ownerConfidence = "NOT_FOUND";
-      else if (/high/i.test(v)) mapped.ownerConfidence = "HIGH";
-      else if (/med/i.test(v)) mapped.ownerConfidence = "MEDIUM";
-      else if (/low/i.test(v)) mapped.ownerConfidence = "LOW";
     } else if (canonical === "websiteUrl") {
       if (/^none/i.test(v) || /social only/i.test(v)) {
         mapped.socialOnly = true;
@@ -131,8 +122,6 @@ export const IMPORT_TEMPLATE_HEADERS = [
   "Instagram Followers",
   "Phone",
   "Owner Name",
-  "Owner Confidence",
-  "Owner Source",
   "Weakness Notes",
   "Review Count",
   "Rating",

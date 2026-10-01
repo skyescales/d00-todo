@@ -6,15 +6,6 @@ import type { SerializedLead } from "@/types/lead";
 import { STATUS_ORDER, STATUS_LABELS } from "@/lib/statuses";
 import type { LeadStatus } from "@prisma/client";
 import InstagramSearchButton from "@/components/InstagramSearchButton";
-import OwnerSearchPanel from "@/components/OwnerSearchPanel";
-
-const OWNER_CONFIDENCE_OPTIONS = ["HIGH", "MEDIUM", "LOW", "NOT_FOUND"] as const;
-const OWNER_CONFIDENCE_LABELS: Record<(typeof OWNER_CONFIDENCE_OPTIONS)[number], string> = {
-  HIGH: "High",
-  MEDIUM: "Medium",
-  LOW: "Low",
-  NOT_FOUND: "Not found",
-};
 
 type FormState = {
   businessName: string;
@@ -25,8 +16,6 @@ type FormState = {
   instagramFollowers: string;
   phone: string;
   ownerName: string;
-  ownerConfidence: "" | "HIGH" | "MEDIUM" | "LOW" | "NOT_FOUND";
-  ownerSource: string;
   weaknessNotes: string;
   reviewCount: string;
   rating: string;
@@ -47,8 +36,6 @@ function toFormState(lead?: SerializedLead): FormState {
     instagramFollowers: lead?.instagramFollowers?.toString() ?? "",
     phone: lead?.phone ?? "",
     ownerName: lead?.ownerName ?? "",
-    ownerConfidence: lead?.ownerConfidence ?? "",
-    ownerSource: lead?.ownerSource ?? "",
     weaknessNotes: lead?.weaknessNotes ?? "",
     reviewCount: lead?.reviewCount?.toString() ?? "",
     rating: lead?.rating?.toString() ?? "",
@@ -85,8 +72,6 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
       instagramFollowers: form.instagramFollowers ? parseInt(form.instagramFollowers, 10) : null,
       phone: form.phone || null,
       ownerName: form.ownerName || null,
-      ownerConfidence: form.ownerConfidence || null,
-      ownerSource: form.ownerSource || null,
       weaknessNotes: form.weaknessNotes || null,
       reviewCount: form.reviewCount ? parseInt(form.reviewCount, 10) : null,
       rating: form.rating ? parseFloat(form.rating) : null,
@@ -142,57 +127,11 @@ export default function LeadForm({ lead }: { lead?: SerializedLead }) {
             />
           </Field>
           <Field label="Owner / Manager Name">
-            <div className="flex items-center gap-2">
-              <input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} className="input" />
-              {!form.ownerName && form.businessName && form.city && (
-                <OwnerSearchPanel businessName={form.businessName} city={form.city} compact />
-              )}
-            </div>
+            <input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} className="input" />
           </Field>
           <Field label="Phone">
             <input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="input" placeholder="(555) 555-5555" />
           </Field>
-          {!form.ownerName && (
-            <Field label="Owner Research Status">
-              <select
-                value={form.ownerConfidence}
-                onChange={(e) => set("ownerConfidence", e.target.value as FormState["ownerConfidence"])}
-                className="input"
-              >
-                <option value="">Not yet researched</option>
-                {OWNER_CONFIDENCE_OPTIONS.filter((c) => c === "NOT_FOUND").map((c) => (
-                  <option key={c} value={c}>
-                    {OWNER_CONFIDENCE_LABELS[c]} - couldn&apos;t confirm an owner
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-          {form.ownerName && (
-            <>
-              <Field label="Owner Confidence">
-                <select
-                  value={form.ownerConfidence || "HIGH"}
-                  onChange={(e) => set("ownerConfidence", e.target.value as FormState["ownerConfidence"])}
-                  className="input"
-                >
-                  {OWNER_CONFIDENCE_OPTIONS.filter((c) => c !== "NOT_FOUND").map((c) => (
-                    <option key={c} value={c}>
-                      {OWNER_CONFIDENCE_LABELS[c]}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Owner Source">
-                <input
-                  value={form.ownerSource}
-                  onChange={(e) => set("ownerSource", e.target.value)}
-                  className="input"
-                  placeholder="e.g. Website, LinkedIn, Google, Instagram"
-                />
-              </Field>
-            </>
-          )}
         </div>
       </section>
 

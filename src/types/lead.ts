@@ -22,8 +22,6 @@ export type LeadInput = {
   instagramFollowers?: number | null;
   phone?: string | null;
   ownerName?: string | null;
-  ownerConfidence?: "HIGH" | "MEDIUM" | "LOW" | "NOT_FOUND" | null;
-  ownerSource?: string | null;
   weaknessNotes?: string | null;
   reviewCount?: number | null;
   rating?: number | null;

@@ -46,9 +46,6 @@ export async function POST(req: NextRequest) {
     const instagramConfidence = row.instagramConfidence ?? (instagram ? "VERIFIED" : null);
     const status = instagramConfidence === "NOT_FOUND" ? "NOT_FOUND" : "NEW";
 
-    const ownerName = row.ownerName?.trim() || null;
-    const ownerConfidence = row.ownerConfidence ?? (ownerName ? "HIGH" : null);
-
     const existing = await prisma.lead.findUnique({
       where: { businessNameKey_cityKey: { businessNameKey, cityKey } },
     });
@@ -68,13 +65,6 @@ export async function POST(req: NextRequest) {
       }
       if (existing.status === "NEW" && status === "NOT_FOUND") {
         backfill.status = "NOT_FOUND";
-      }
-      if (!existing.ownerName && ownerName) {
-        backfill.ownerName = ownerName;
-        backfill.ownerConfidence = ownerConfidence;
-        if (row.ownerSource?.trim()) backfill.ownerSource = row.ownerSource.trim();
-      } else if (!existing.ownerConfidence && ownerConfidence) {
-        backfill.ownerConfidence = ownerConfidence;
       }
       // The "list" a lead belongs to (Source) is just an organizational tag,
       // not researched data - safe to move a lead to a different list on
@@ -106,9 +96,7 @@ export async function POST(req: NextRequest) {
         instagramConfidence,
         instagramFollowers: row.instagramFollowers ?? null,
         phone: row.phone?.trim() || null,
-        ownerName,
-        ownerConfidence,
-        ownerSource: row.ownerSource?.trim() || null,
+        ownerName: row.ownerName?.trim() || null,
         weaknessNotes: row.weaknessNotes?.trim() || null,
         reviewCount: row.reviewCount ?? null,
         rating: row.rating ?? null,
