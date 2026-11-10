@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { leadKeys } from "@/lib/dedupe";
 import type { ImportRow } from "@/lib/csv";
+import type { Prisma } from "@prisma/client";
 
 type Result = {
   total: number;
@@ -20,8 +21,13 @@ export async function POST(req: NextRequest) {
 
   const result: Result = { total: rows.length, inserted: 0, updated: 0, skippedDuplicates: [], errors: [] };
 
-  // Track keys seen within this batch too, so duplicate rows inside the
-  // same CSV paste don't both get inserted.
+  // Validate rows and compute keys up front (in memory, no DB calls) so we
+  // can look up every existing match in a single query instead of one
+  // round-trip per row - with large batches (hundreds of rows), doing a
+  // sequential findUnique+create/update per row risks exceeding the
+  // serverless function's execution timeout.
+  type Prepared = { row: ImportRow; businessNameKey: string; cityKey: string; batchKey: string };
+  const prepared: Prepared[] = [];
   const seenInBatch = new Set<string>();
 
   for (let i = 0; i < rows.length; i++) {
@@ -37,7 +43,21 @@ export async function POST(req: NextRequest) {
       result.skippedDuplicates.push({ businessName: row.businessName, city: row.city });
       continue;
     }
+    seenInBatch.add(batchKey);
+    prepared.push({ row, businessNameKey, cityKey, batchKey });
+  }
 
+  const existingLeads = prepared.length
+    ? await prisma.lead.findMany({
+        where: { OR: prepared.map((p) => ({ businessNameKey: p.businessNameKey, cityKey: p.cityKey })) },
+      })
+    : [];
+  const existingByKey = new Map(existingLeads.map((lead) => [`${lead.businessNameKey}::${lead.cityKey}`, lead]));
+
+  const toCreate: Prisma.LeadCreateManyInput[] = [];
+  const updates: { id: string; data: Record<string, unknown> }[] = [];
+
+  for (const { row, businessNameKey, cityKey, batchKey } of prepared) {
     const instagram = row.instagram?.trim() || null;
     // Confidence: explicit CSV column wins; otherwise infer from whether a
     // handle was given. A row researched and confirmed to have no Instagram
@@ -46,9 +66,7 @@ export async function POST(req: NextRequest) {
     const instagramConfidence = row.instagramConfidence ?? (instagram ? "VERIFIED" : null);
     const status = instagramConfidence === "NOT_FOUND" ? "NOT_FOUND" : "NEW";
 
-    const existing = await prisma.lead.findUnique({
-      where: { businessNameKey_cityKey: { businessNameKey, cityKey } },
-    });
+    const existing = existingByKey.get(batchKey);
     if (existing) {
       // A lead with this name+city already exists, most often because it was
       // first imported before Instagram research was done. Backfill the
@@ -75,41 +93,43 @@ export async function POST(req: NextRequest) {
       }
 
       if (Object.keys(backfill).length > 0) {
-        await prisma.lead.update({ where: { id: existing.id }, data: backfill });
-        result.updated++;
+        updates.push({ id: existing.id, data: backfill });
       } else {
         result.skippedDuplicates.push({ businessName: row.businessName, city: row.city });
       }
-      seenInBatch.add(batchKey);
       continue;
     }
 
-    await prisma.lead.create({
-      data: {
-        businessName: row.businessName.trim(),
-        businessNameKey,
-        city: row.city.trim(),
-        cityKey,
-        websiteUrl: row.socialOnly ? null : row.websiteUrl?.trim() || null,
-        socialOnly: Boolean(row.socialOnly),
-        instagram,
-        instagramConfidence,
-        instagramFollowers: row.instagramFollowers ?? null,
-        phone: row.phone?.trim() || null,
-        ownerName: row.ownerName?.trim() || null,
-        weaknessNotes: row.weaknessNotes?.trim() || null,
-        reviewCount: row.reviewCount ?? null,
-        rating: row.rating ?? null,
-        yearsInBusiness: row.yearsInBusiness ?? null,
-        estimatedMembers: row.estimatedMembers ?? null,
-        sizeNotes: row.sizeNotes?.trim() || null,
-        source: row.source?.trim() || "CSV import",
-        status,
-      },
+    toCreate.push({
+      businessName: row.businessName.trim(),
+      businessNameKey,
+      city: row.city.trim(),
+      cityKey,
+      websiteUrl: row.socialOnly ? null : row.websiteUrl?.trim() || null,
+      socialOnly: Boolean(row.socialOnly),
+      instagram,
+      instagramConfidence,
+      instagramFollowers: row.instagramFollowers ?? null,
+      phone: row.phone?.trim() || null,
+      ownerName: row.ownerName?.trim() || null,
+      weaknessNotes: row.weaknessNotes?.trim() || null,
+      reviewCount: row.reviewCount ?? null,
+      rating: row.rating ?? null,
+      yearsInBusiness: row.yearsInBusiness ?? null,
+      estimatedMembers: row.estimatedMembers ?? null,
+      sizeNotes: row.sizeNotes?.trim() || null,
+      source: row.source?.trim() || "CSV import",
+      status,
     });
+  }
 
-    seenInBatch.add(batchKey);
-    result.inserted++;
+  if (toCreate.length) {
+    const created = await prisma.lead.createMany({ data: toCreate, skipDuplicates: true });
+    result.inserted = created.count;
+  }
+  if (updates.length) {
+    await prisma.$transaction(updates.map((u) => prisma.lead.update({ where: { id: u.id }, data: u.data })));
+    result.updated = updates.length;
   }
 
   return NextResponse.json(result);
